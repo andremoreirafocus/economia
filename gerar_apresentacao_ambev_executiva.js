@@ -1,6 +1,9 @@
 const pptxgen = require('/tmp/ambev_presentation/node_modules/pptxgenjs');
 const expandScenarios = process.env.AMBEV_EXPAND_SCENARIOS === '1';
+const recalibrateScenarios = process.env.AMBEV_RECALIBRATE_SCENARIOS === '1';
+const synthesizeFive = process.env.AMBEV_SYNTHESIZE_FIVE === '1';
 const outputFile = process.env.AMBEV_OUTPUT_FILE || 'APRESENTACAO_AMBEV_EXECUTIVA.pptx';
+const scenarioPageStart = synthesizeFive ? 2 : 4;
 
 const pptx = new pptxgen();
 pptx.layout = 'LAYOUT_WIDE';
@@ -109,6 +112,7 @@ function scenarioCard(slide, x, color, titleValue, tag, metrics, economy, ambev,
 }
 
 // Slide 1
+if (!synthesizeFive) {
 {
   const s = pptx.addSlide();
   s.background = { color: C.navy };
@@ -128,8 +132,10 @@ function scenarioCard(slide, x, color, titleValue, tag, metrics, economy, ambev,
   text(s, 'Posicionamento para os cenários do enunciado', 9.45, 5.97, 2.75, 0.20, { fontSize: 8.2, color: '92C9C4', align: 'right' });
   footer(s, 'Fontes: Ambev, Release 3T26 (29/10/2026); Form 20-F 2025; RI Ambev — Dados consultados em 23/11/2026.', 1, true);
 }
+}
 
 // Slide 2
+if (!synthesizeFive) {
 {
   const s = pptx.addSlide();
   s.background = { color: C.cream };
@@ -168,6 +174,45 @@ function scenarioCard(slide, x, color, titleValue, tag, metrics, economy, ambev,
   text(s, 'cobre exposição cambial; não todo o choque de custo', 9.08, 5.98, 2.82, 0.15, { fontSize: 7.5, color: 'D7E2E8' });
   footer(s, 'Fontes: Ambev, Release 3T26; Form 20-F 2025 (insumos, câmbio e reforma tributária).', 2);
 }
+}
+
+// Síntese dos antigos slides 1 e 2
+if (synthesizeFive) {
+  const s = pptx.addSlide();
+  s.background = { color: C.cream };
+  header(s, 'Visão da empresa', 'Ambev é financeiramente resiliente; a tese para 2027 é operacional.', 'O resultado dependerá de consumo, preço/mix versus custo por hectolitro e tributação — não da Selic isoladamente.');
+  metricCard(s, 0.58, 1.72, 2.55, 'Receita líquida 2025', 'R$ 88,2 bi', 'Escala financeira', C.teal);
+  metricCard(s, 3.32, 1.72, 2.55, 'Caixa líquido 2025', 'R$ 16,9 bi', 'Resiliência a juros altos', C.amber);
+  metricCard(s, 6.06, 1.72, 2.55, 'Brasil no 3T26', '57,2%', 'Da receita consolidada', C.orange);
+  metricCard(s, 8.80, 1.72, 3.95, 'Proteção 2027', 'Hedge BRL/USD', 'Cobre exposição cambial; não todo o choque de custo', C.green);
+  shape(s, pptx.ShapeType.roundRect, 0.58, 3.25, 6.20, 2.98, C.white, C.white, 0.12);
+  text(s, 'TRÊS VARIÁVEIS QUE DEFINEM A TESE', 0.90, 3.58, 3.90, 0.15, { fontSize: 8, color: C.teal, bold: true, charSpacing: 0.9 });
+  const drivers = [
+    ['DEMANDA', 'PIB, emprego, renda real e crédito definem volume e elasticidade a preço.'],
+    ['MARGEM', 'Receita/hl versus CPV/hl mostra se o repasse preserva valor ou destrói volume.'],
+    ['REGRAS DO JOGO', 'BRL/USD, commodities, diesel e Imposto Seletivo pressionam custos.']
+  ];
+  drivers.forEach((d, i) => {
+    const y = 3.98 + i * 0.67;
+    shape(s, pptx.ShapeType.ellipse, 0.92, y + 0.03, 0.23, 0.23, i === 0 ? C.teal : (i === 1 ? C.orange : C.amber), C.white);
+    text(s, d[0], 1.34, y, 1.32, 0.15, { fontSize: 8, color: C.navy, bold: true, charSpacing: 0.5 });
+    text(s, d[1], 2.55, y - 0.03, 3.72, 0.28, { fontSize: 9.4, color: C.ink, valign: 'top' });
+  });
+  shape(s, pptx.ShapeType.roundRect, 7.08, 3.25, 5.67, 2.98, C.navy, C.navy, 0.12);
+  text(s, 'O QUE O 3T26 JÁ MOSTRA', 7.43, 3.58, 3.25, 0.15, { fontSize: 8, color: '92C9C4', bold: true, charSpacing: 0.9 });
+  text(s, 'Cerveja Brasil', 7.43, 4.03, 1.55, 0.16, { fontSize: 10, color: C.white, bold: true });
+  text(s, '+0,5%', 7.43, 4.31, 1.14, 0.28, { fontSize: 22, color: '87C7C2', bold: true });
+  text(s, 'volume', 8.51, 4.40, 0.58, 0.13, { fontSize: 7.7, color: 'D7E2E8' });
+  line(s, 9.30, 4.01, 9.30, 4.72, '345166', 0.7);
+  text(s, '+4,8%', 9.63, 4.31, 1.18, 0.28, { fontSize: 22, color: 'F1B44C', bold: true });
+  text(s, 'receita/hl', 10.74, 4.40, 0.75, 0.13, { fontSize: 7.7, color: 'D7E2E8' });
+  line(s, 11.48, 4.01, 11.48, 4.72, '345166', 0.7);
+  text(s, '+5,4%', 11.79, 4.31, 1.10, 0.28, { fontSize: 22, color: 'F08A4B', bold: true });
+  text(s, 'CPV/hl caixa', 7.43, 4.93, 1.37, 0.15, { fontSize: 8, color: 'D7E2E8', bold: true });
+  text(s, 'Sinal de atenção: custo por hectolitro cresceu acima da receita por hectolitro.', 7.43, 5.23, 4.54, 0.25, { fontSize: 10.5, color: C.white, bold: true });
+  text(s, 'Tese do grupo: no cenário-base, preservar participação e eficiência vem antes de ampliar capex.', 7.43, 5.70, 4.52, 0.24, { fontSize: 8.7, color: '92C9C4', italic: true });
+  footer(s, 'Fontes: Ambev, Release 3T26 (29/10/2026); Form 20-F 2025; RI Ambev — Dados consultados em 23/11/2026.', 1);
+}
 
 // Slide 3 — matriz original ou três slides detalhados de cenários
 if (!expandScenarios) {
@@ -180,16 +225,39 @@ if (!expandScenarios) {
   footer(s, 'Fontes: enunciado do trabalho; Ambev, Release 3T26 e Form 20-F 2025; MF/SPE, Boletim Macrofiscal (23/11/2026).', 3);
 }
 
+if (expandScenarios && !synthesizeFive) {
+  const s = pptx.addSlide();
+  s.background = { color: C.cream };
+  header(s, 'Contexto econômico atual', 'Brasil em 2026: inflação, juros e câmbio ainda restringem o consumo.', 'Medianas do Boletim Focus de 19/11/2026 — projeções de mercado, não previsões do Banco Central.');
+  metricCard(s, 0.58, 1.82, 2.72, 'IPCA 2026', '5,15%', 'Pressão sobre renda e custos', C.orange);
+  metricCard(s, 3.53, 1.82, 2.72, 'PIB 2026', '1,70%', 'Atividade moderada', C.teal);
+  metricCard(s, 6.48, 1.82, 2.72, 'Câmbio 2026', 'R$ 5,55', 'por US$ — pressão em insumos', C.amber);
+  metricCard(s, 9.43, 1.82, 2.72, 'Selic 2026', '13,75%', 'Crédito e demanda contidos', C.red);
+  shape(s, pptx.ShapeType.roundRect, 0.58, 3.48, 7.43, 2.55, C.white, C.white, 0.12);
+  text(s, 'LEITURA MACROECONÔMICA', 0.91, 3.82, 2.95, 0.16, { fontSize: 8, color: C.teal, bold: true, charSpacing: 1.0 });
+  bullet(s, 'Inflação ainda elevada e juros restritivos limitam crédito, renda disponível e ocasiões de consumo.', 0.92, 4.23, 6.45);
+  bullet(s, 'Câmbio mais depreciado encarece componentes e commodities vinculados ao dólar.', 0.92, 4.77, 6.45);
+  bullet(s, 'O conjunto de indicadores se aproxima mais do cenário de equilíbrio instável do que do otimista.', 0.92, 5.31, 6.45);
+  shape(s, pptx.ShapeType.roundRect, 8.34, 3.48, 4.41, 2.55, C.navy, C.navy, 0.12);
+  text(s, 'IMPLICAÇÃO PARA A AMBEV', 8.68, 3.82, 3.10, 0.16, { fontSize: 8, color: '92C9C4', bold: true, charSpacing: 0.9 });
+  text(s, 'Prioridade imediata', 8.68, 4.23, 2.05, 0.17, { fontSize: 10.5, color: C.white, bold: true });
+  text(s, 'Preservar volume e margem com preço/mix, retornáveis, produtividade e capex seletivo.', 8.68, 4.51, 3.46, 0.52, { fontSize: 11.4, color: C.white, bold: true, valign: 'top' });
+  line(s, 8.68, 5.27, 12.05, 5.27, '345166', 0.7);
+  text(s, 'Atenção', 8.68, 5.47, 1.0, 0.14, { fontSize: 7.5, color: 'F1B44C', bold: true, charSpacing: 0.7 });
+  text(s, 'Câmbio e inflação afetam custos; renda e crédito afetam volume.', 9.47, 5.42, 2.62, 0.22, { fontSize: 8.4, color: 'D7E2E8' });
+  footer(s, 'Fonte: Banco Central do Brasil, Focus — Market Readout de 19/11/2026. Dados consultados em 23/11/2026.', 3);
+}
+
 if (expandScenarios) {
   const s = pptx.addSlide();
   s.background = { color: C.cream };
-  header(s, 'Cenários 2027  |  1 de 3', 'Ajuste com crescimento: capturar volume sem trocar margem por preço.', 'Cenário otimista do enunciado — a alavanca central é a recuperação da demanda doméstica.');
+  header(s, 'Cenários 2027  |  1 de 3', 'Ajuste com crescimento: capturar volume sem trocar margem por preço.', recalibrateScenarios ? 'Cenário otimista recalibrado a partir do Focus de 2026 e da referência de mercado para 2027.' : 'Cenário otimista do enunciado — a alavanca central é a recuperação da demanda doméstica.');
   shape(s, pptx.ShapeType.roundRect, 0.58, 1.77, 3.20, 4.91, C.green, C.green, 0.12);
   text(s, 'OTIMISTA', 0.92, 2.10, 1.35, 0.18, { fontSize: 8, color: 'E6F4EA', bold: true, charSpacing: 1.1 });
   text(s, 'Ajuste com\ncrescimento', 0.92, 2.47, 2.35, 0.68, { fontSize: 22, color: C.white, bold: true, valign: 'top' });
   line(s, 0.92, 3.38, 3.18, 3.38, '7AC18D', 0.8);
-  text(s, 'PREMISSAS DO ENUNCIADO', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'E6F4EA', bold: true, charSpacing: 0.7 });
-  text(s, 'PIB 2,5%–3,0%\nIPCA 3,5%–4,0%\nSelic 10,5%–11,5%\nBRL 4,80–5,10\nBrent ~ US$ 75', 0.92, 4.01, 1.85, 1.22, { fontSize: 14, color: C.white, bold: true, valign: 'top' });
+  text(s, recalibrateScenarios ? 'PREMISSAS RECALIBRADAS' : 'PREMISSAS DO ENUNCIADO', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'E6F4EA', bold: true, charSpacing: 0.7 });
+  text(s, recalibrateScenarios ? 'PIB 1,8%–2,4%\nIPCA 4,3%–4,9%\nSelic 11,5%–12,5%\nBRL 5,10–5,40\nBrent US$ 75–85' : 'PIB 2,5%–3,0%\nIPCA 3,5%–4,0%\nSelic 10,5%–11,5%\nBRL 4,80–5,10\nBrent ~ US$ 75', 0.92, 4.01, 1.85, 1.22, { fontSize: 14, color: C.white, bold: true, valign: 'top' });
   text(s, 'Economia: crédito e renda ganham tração; inflação e logística aliviam.', 0.92, 5.72, 2.22, 0.47, { fontSize: 9.1, color: 'E6F4EA', valign: 'top' });
   const blocks = [
     ['IMPLICAÇÃO PARA A AMBEV', 'Maior consumo fora do lar e renda disponível favorecem volume, premiumização e NAB. Câmbio e energia mais benignos aliviam insumos e distribuição.'],
@@ -205,7 +273,7 @@ if (expandScenarios) {
   });
   shape(s, pptx.ShapeType.roundRect, 4.12, 6.27, 8.63, 0.41, 'E6F4EA', 'E6F4EA', 0.06);
   text(s, 'LEITURA CRÍTICA  |  O ganho mais relevante é operacional — volume e margem —, não financeiro.', 4.43, 6.39, 7.85, 0.14, { fontSize: 8.2, color: C.green, bold: true });
-  footer(s, 'Fontes: enunciado do trabalho; Ambev, Release 3T26 e Form 20-F 2025. Impactos e decisões: análise do grupo.', 3);
+  footer(s, recalibrateScenarios ? 'Fontes: BCB, Focus (19/11/2026); MF/SPE, Boletim Macrofiscal; Ambev, Release 3T26 e Form 20-F 2025.' : 'Fontes: enunciado do trabalho; Ambev, Release 3T26 e Form 20-F 2025. Impactos e decisões: análise do grupo.', scenarioPageStart);
 }
 
 if (expandScenarios) {
@@ -216,9 +284,9 @@ if (expandScenarios) {
   text(s, 'CENÁRIO-BASE', 0.92, 2.10, 1.75, 0.18, { fontSize: 8, color: 'FFF1D5', bold: true, charSpacing: 1.0 });
   text(s, 'Equilíbrio\ninstável', 0.92, 2.47, 2.30, 0.68, { fontSize: 22, color: C.white, bold: true, valign: 'top' });
   line(s, 0.92, 3.38, 3.18, 3.38, 'E9C171', 0.8);
-  text(s, 'REFERÊNCIA PARA 2027', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'FFF1D5', bold: true, charSpacing: 0.7 });
-  text(s, 'SPE/MF:\nPIB 1,8%\nIPCA 4,5%\nBRL médio 5,34\nSelic acumulada 12,93%', 0.92, 4.01, 2.15, 1.30, { fontSize: 13.5, color: C.white, bold: true, valign: 'top' });
-  text(s, 'Enunciado: PIB 1,2%–1,8%; Selic 12%–13%; BRL 5,10–5,50.', 0.92, 5.72, 2.22, 0.47, { fontSize: 8.7, color: 'FFF1D5', valign: 'top' });
+  text(s, recalibrateScenarios ? 'FOCUS 2027 E FAIXA DO GRUPO' : 'REFERÊNCIA PARA 2027', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'FFF1D5', bold: true, charSpacing: 0.7 });
+  text(s, recalibrateScenarios ? 'Focus: PIB 1,0% | IPCA 5,12%\nBRL 5,50 | Selic 13,0%\n\nGrupo: IPCA 5,2%–5,8%\nSelic 12,75%–13,5%' : 'SPE/MF:\nPIB 1,8%\nIPCA 4,5%\nBRL médio 5,34\nSelic acumulada 12,93%', 0.92, 4.01, 2.15, 1.30, { fontSize: recalibrateScenarios ? 11.2 : 13.5, color: C.white, bold: true, valign: 'top' });
+  text(s, recalibrateScenarios ? 'Faixa do grupo: PIB 0,8%–1,4%; BRL 5,45–5,80; Brent US$ 90–105.' : 'Enunciado: PIB 1,2%–1,8%; Selic 12%–13%; BRL 5,10–5,50.', 0.92, 5.72, 2.22, 0.47, { fontSize: 8.7, color: 'FFF1D5', valign: 'top' });
   const blocks = [
     ['O QUE JÁ É VISÍVEL', 'No 3T26, Cerveja Brasil cresceu 0,5% em volume; receita/hl avançou 4,8%, abaixo do CPV/hl caixa (+5,4%).'],
     ['IMPLICAÇÃO PARA A AMBEV', 'Preço/mix sustenta receita, mas juros, renda mais fraca, câmbio e frete limitam volume e pressionam margem. O hedge BRL/USD reduz apenas parte do risco.'],
@@ -233,7 +301,7 @@ if (expandScenarios) {
   });
   shape(s, pptx.ShapeType.roundRect, 4.12, 6.27, 8.63, 0.41, 'FFF1D5', 'FFF1D5', 0.06);
   text(s, 'RISCO REGULATÓRIO  |  Imposto Seletivo sobre bebidas alcoólicas e açucaradas entra em vigor em 2027; alíquotas ainda não estavam plenamente definidas.', 4.43, 6.35, 7.92, 0.16, { fontSize: 7.7, color: C.amber, bold: true });
-  footer(s, 'Fontes: MF/SPE, Boletim Macrofiscal (23/11/2026); Ambev, Release 3T26 e Form 20-F 2025; enunciado.', 4);
+  footer(s, recalibrateScenarios ? 'Fontes: BCB, Focus (19/11/2026); MF/SPE, Boletim Macrofiscal; Ambev, Release 3T26 e Form 20-F 2025.' : 'Fontes: MF/SPE, Boletim Macrofiscal (23/11/2026); Ambev, Release 3T26 e Form 20-F 2025; enunciado.', scenarioPageStart + 1);
 }
 
 if (expandScenarios) {
@@ -244,8 +312,8 @@ if (expandScenarios) {
   text(s, 'PESSIMISTA', 0.92, 2.10, 1.40, 0.18, { fontSize: 8, color: 'FCE5E3', bold: true, charSpacing: 1.1 });
   text(s, 'Choque\nduplo', 0.92, 2.47, 2.30, 0.68, { fontSize: 22, color: C.white, bold: true, valign: 'top' });
   line(s, 0.92, 3.38, 3.18, 3.38, 'E49A96', 0.8);
-  text(s, 'PREMISSAS DO ENUNCIADO', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'FCE5E3', bold: true, charSpacing: 0.7 });
-  text(s, 'IPCA 6,0%–7,5%\nSelic 15%–16%\nBRL 5,80–6,50\nBrent > US$ 120\nCrédito encolhe', 0.92, 4.01, 2.10, 1.22, { fontSize: 13.5, color: C.white, bold: true, valign: 'top' });
+  text(s, recalibrateScenarios ? 'PREMISSAS RECALIBRADAS' : 'PREMISSAS DO ENUNCIADO', 0.92, 3.67, 2.35, 0.15, { fontSize: 7, color: 'FCE5E3', bold: true, charSpacing: 0.7 });
+  text(s, recalibrateScenarios ? 'PIB -0,5 %–0,5%\nIPCA 6,5%–8,0%\nSelic 15,0%–16,5%\nBRL 6,00–6,80\nBrent > US$ 120' : 'IPCA 6,0%–7,5%\nSelic 15%–16%\nBRL 5,80–6,50\nBrent > US$ 120\nCrédito encolhe', 0.92, 4.01, 2.10, 1.22, { fontSize: 13.5, color: C.white, bold: true, valign: 'top' });
   text(s, 'Economia: renda e crédito retraem; inflação e câmbio elevam o custo de vida.', 0.92, 5.72, 2.22, 0.47, { fontSize: 9.0, color: 'FCE5E3', valign: 'top' });
   const blocks = [
     ['CANAIS DE PRESSÃO', 'Dólar, commodities e petróleo encarecem embalagem, insumos e distribuição; perda de renda aumenta a sensibilidade do consumidor ao preço.'],
@@ -261,10 +329,11 @@ if (expandScenarios) {
   });
   shape(s, pptx.ShapeType.roundRect, 4.12, 6.27, 8.63, 0.41, 'FCE5E3', 'FCE5E3', 0.06);
   text(s, 'PRIORIDADE  |  Evitar que a defesa de margem via preço acelere a perda de volume e participação.', 4.43, 6.39, 7.70, 0.14, { fontSize: 8.15, color: C.red, bold: true });
-  footer(s, 'Fontes: enunciado do trabalho; Ambev, Form 20-F 2025 (câmbio, insumos, riscos operacionais); Release 3T26.', 5);
+  footer(s, recalibrateScenarios ? 'Fontes: BCB, Focus (19/11/2026); MF/SPE, Boletim Macrofiscal; Ambev, Form 20-F 2025; Release 3T26.' : 'Fontes: enunciado do trabalho; Ambev, Form 20-F 2025 (câmbio, insumos, riscos operacionais); Release 3T26.', scenarioPageStart + 2);
 }
 
 // Slide 4
+if (!synthesizeFive) {
 {
   const s = pptx.addSlide();
   s.background = { color: C.cream };
@@ -298,10 +367,12 @@ if (expandScenarios) {
     text(s, c[1], 8.60, y + 0.34, 3.35, 0.18, { fontSize: 9.4, color: C.white, bold: true });
   });
   text(s, 'Leitura crítica: o hedge cambial e o caixa diminuem vulnerabilidade financeira, mas não substituem execução comercial.', 8.36, 5.98, 3.75, 0.30, { fontSize: 8.5, color: 'D7E2E8', italic: true, valign: 'top' });
-  footer(s, 'Fontes: Ambev, Release 3T26; Form 20-F 2025. Recomendações: análise do grupo.', expandScenarios ? 6 : 4);
+  footer(s, 'Fontes: Ambev, Release 3T26; Form 20-F 2025. Recomendações: análise do grupo.', expandScenarios ? 7 : 4);
+}
 }
 
 // Slide 5
+if (!synthesizeFive) {
 {
   const s = pptx.addSlide();
   s.background = { color: C.cream };
@@ -329,7 +400,57 @@ if (expandScenarios) {
   shape(s, pptx.ShapeType.roundRect, 0.58, 5.95, 12.17, 0.65, C.navy, C.navy, 0.10);
   text(s, 'CONCLUSÃO', 0.90, 6.16, 1.20, 0.14, { fontSize: 7.6, color: '92C9C4', bold: true, charSpacing: 0.8 });
   text(s, 'Cenário-base é o mais aderente aos dados atuais: proteger volume e margem agora; acelerar somente quando os sinais de demanda sustentarem a decisão.', 2.12, 6.09, 9.95, 0.25, { fontSize: 11, color: C.white, bold: true });
-  footer(s, 'Fontes: Ambev, Release 3T26 e Form 20-F 2025; MF/SPE, Boletim Macrofiscal; BCB Focus. Síntese: grupo.', expandScenarios ? 7 : 5);
+  footer(s, 'Fontes: Ambev, Release 3T26 e Form 20-F 2025; MF/SPE, Boletim Macrofiscal; BCB Focus. Síntese: grupo.', expandScenarios ? 8 : 5);
+}
+}
+
+// Síntese dos antigos slides de recomendação e monitoramento
+if (synthesizeFive) {
+  const s = pptx.addSlide();
+  s.background = { color: C.cream };
+  header(s, 'Estratégia e monitoramento', 'Proteger volume e margem agora; acelerar apenas quando os sinais sustentarem a decisão.', 'A disciplina é ligar cada indicador a uma ação — não acompanhar números isolados.');
+  shape(s, pptx.ShapeType.roundRect, 0.58, 1.73, 6.16, 3.83, C.white, C.white, 0.12);
+  text(s, 'NÚCLEO ROBUSTO — VÁLIDO NOS TRÊS CENÁRIOS', 0.90, 2.07, 4.45, 0.15, { fontSize: 8, color: C.teal, bold: true, charSpacing: 0.8 });
+  const robust = [
+    ['01', 'Defender volume', 'Arquitetura de preço, retornáveis, portfólio acessível e execução no ponto de venda.'],
+    ['02', 'Travar eficiência', 'Contratos de insumo, produtividade fabril e logística.'],
+    ['03', 'Preservar opcionalidade', 'Capex disciplinado e caixa para responder a oportunidades.']
+  ];
+  robust.forEach((r, i) => {
+    const y = 2.51 + i * 0.86;
+    shape(s, pptx.ShapeType.ellipse, 0.92, y, 0.37, 0.37, i === 0 ? C.teal : (i === 1 ? C.orange : C.amber), C.white);
+    text(s, r[0], 0.92, y + 0.11, 0.37, 0.11, { fontSize: 6.7, color: C.white, bold: true, align: 'center' });
+    text(s, r[1], 1.55, y - 0.01, 2.42, 0.17, { fontSize: 11.2, color: C.navy, bold: true });
+    text(s, r[2], 1.55, y + 0.26, 4.53, 0.24, { fontSize: 8.9, color: C.gray, valign: 'top' });
+  });
+  shape(s, pptx.ShapeType.roundRect, 7.05, 1.73, 5.70, 3.83, C.navy, C.navy, 0.12);
+  text(s, 'GATILHOS DE DECISÃO', 7.39, 2.07, 2.85, 0.15, { fontSize: 8, color: '92C9C4', bold: true, charSpacing: 0.8 });
+  const triggers = [
+    ['SE VOLUME REAGE', 'Acelerar premiumização, distribuição e inovação.', '87C7C2'],
+    ['SE CUSTO SUPERA PREÇO', 'Cortar complexidade, ampliar produtividade e rever mix.', 'F1B44C'],
+    ['SE CHOQUE SE CONFIRMA', 'Adiar capex discricionário e reforçar liquidez.', 'F08A4B']
+  ];
+  triggers.forEach((t, i) => {
+    const y = 2.49 + i * 0.88;
+    shape(s, pptx.ShapeType.roundRect, 7.39, y, 4.93, 0.63, '173A54', '173A54', 0.07);
+    text(s, t[0], 7.64, y + 0.10, 1.75, 0.12, { fontSize: 6.8, color: t[2], bold: true, charSpacing: 0.55 });
+    text(s, t[1], 7.64, y + 0.29, 4.20, 0.15, { fontSize: 8.8, color: C.white, bold: true });
+  });
+  text(s, 'PAINEL MENSAL', 0.90, 5.90, 1.55, 0.14, { fontSize: 8, color: C.teal, bold: true, charSpacing: 0.8 });
+  const monitors = [
+    ['DEMANDA', 'Volume Cerveja Brasil e NAB', 'Otimista: sobe | Base: estagna | Pessimista: queda conjunta', C.teal],
+    ['MARGEM', 'Receita/hl versus CPV/hl', 'Otimista: CPV abaixo | Base: diferença estreita | Pessimista: CPV acelera', C.orange],
+    ['MACRO & RISCO', 'BRL/USD, Brent/diesel e tributação', 'Otimista: cede | Base: volatilidade | Pessimista: choque de custo', C.amber]
+  ];
+  monitors.forEach((m, i) => {
+    const x = 0.58 + i * 4.07;
+    shape(s, pptx.ShapeType.roundRect, x, 6.12, 3.81, 0.60, C.white, C.white, 0.07);
+    shape(s, pptx.ShapeType.rect, x, 6.12, 0.08, 0.60, m[3], m[3]);
+    text(s, m[0], x + 0.23, 6.23, 1.12, 0.11, { fontSize: 6.9, color: C.gray, bold: true, charSpacing: 0.5 });
+    text(s, m[1], x + 1.20, 6.20, 2.28, 0.12, { fontSize: 7.8, color: C.navy, bold: true });
+    text(s, m[2], x + 0.23, 6.43, 3.26, 0.11, { fontSize: 6.45, color: C.gray });
+  });
+  footer(s, 'Fontes: Ambev, Release 3T26 e Form 20-F 2025; MF/SPE, Boletim Macrofiscal; BCB Focus. Síntese: grupo.', 5);
 }
 
 // Appendix
